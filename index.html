@@ -1,0 +1,63 @@
+random() * 9) + 2;
+            correctAnswer = Math.floor(Math.random() * 10) + 1;
+            n1 = n2 * correctAnswer;
+        } else if (op === '*') {
+            if(difficulty === 'easy') { n1 = Math.floor(Math.random()*5)+1; n2 = Math.floor(Math.random()*5)+1; }
+            correctAnswer = n1 * n2;
+        } else if (op === '-') {
+            if (n1 < n2) [n1, n2] = [n2, n1];
+            correctAnswer = n1 - n2;
+        } else {
+            correctAnswer = n1 + n2;
+        }
+
+        questionEl.innerText = ${n1} ${op} ${n2};
+        answerEl.value = '';
+    }
+
+    function nextQuestion() {
+        if (qCount >= 10) { showResult(); return; }
+        qCount++;
+        document.getElementById('q-count').innerText = qCount;
+        generateQuestion();
+        resetTimer();
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 5;
+        timerEl.innerText = timeLeft;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerEl.innerText = timeLeft;
+            if (timeLeft <= 0) nextQuestion();
+        }, 1000);
+    }
+
+    answerEl.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter' && answerEl.value !== '') {
+            if (parseInt(answerEl.value) === correctAnswer) score++;
+            nextQuestion();
+        }
+    });
+
+    function showResult() {
+        clearInterval(timerInterval);
+        gameScreen.classList.add('hidden');
+        endScreen.classList.remove('hidden');
+        document.getElementById('final-score').innerText = حصلتِ على ${score} من 10;
+        
+        let adviceText = "";
+        if (difficulty === 'expert') {
+            adviceText = score >= 8 ? "أنتِ عبقرية رياضية حقاً! لا أحد يضاهي سرعتكِ." : "تحدي الأذكياء صعب، لكنكِ أديتِ بشكل رائع!";
+        } else {
+            adviceText = score >= 8 ? "أداء ممتاز! ذكاء حاد وسرعة بديهة." : 
+                         score >= 5 ? "أداء جيد، استمري في التدريب لتصبحي أسرع." : 
+                         "محاولة جيدة، الحساب الذهني يتحسن مع التكرار!";
+        }
+        document.getElementById('advice').innerText = adviceText;
+    }
+</script>
+
+</body>
+</html>
