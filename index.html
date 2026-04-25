@@ -1,61 +1,111 @@
-random() * 9) + 2;
-            correctAnswer = Math.floor(Math.random() * 10) + 1;
-            n1 = n2 * correctAnswer;
-        } else if (op === '*') {
-            if(difficulty === 'easy') { n1 = Math.floor(Math.random()*5)+1; n2 = Math.floor(Math.random()*5)+1; }
-            correctAnswer = n1 * n2;
-        } else if (op === '-') {
-            if (n1 < n2) [n1, n2] = [n2, n1];
-            correctAnswer = n1 - n2;
-        } else {
-            correctAnswer = n1 + n2;
-        }
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار سرعة الرياضيات</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f8ff; padding-top: 50px; }
+        .container { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; font-size: 18px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
+        #game-screen.hidden { display: none; }
+        #timer { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-        questionEl.innerText = ${n1} ${op} ${n2};
-        answerEl.value = '';
+<div class="container">
+    <div id="start-screen">
+        <h1>أهلاً وسهلاً بك</h1>
+        <p>سنختبر سرعتك في الحساب. لديك 5 ثوانٍ لكل سؤال!</p>
+        <button onclick="startGame()">إبدأ اللعبة</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <h2>السؤال رقم: <span id="q-count">1</span> / 10</h2>
+        <h3 id="question-text" style="font-size: 30px;"></h3>
+        <input type="number" id="answer-input" placeholder="اكتب الناتج هنا">
+        <p>الوقت المتبقي: <span id="timer">5</span> ثوانٍ</p>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <h2>انتهى الاختبار!</h2>
+        <p id="final-score"></p>
+        <p id="advice"></p>
+        <button onclick="location.reload()">إعادة اللعب</button>
+    </div>
+</div>
+
+<script>
+    // هذا هو الكود اللي كان عندكِ، وضعناه داخل وسم script
+    let score = 0;
+    let qCount = 1;
+    let timeLeft = 5;
+    let timerInterval;
+    let correctAnswer;
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        nextQuestion();
     }
 
     function nextQuestion() {
-        if (qCount >= 10) { showResult(); return; }
-        qCount++;
+        if (qCount > 10) {
+            showResult();
+            return;
+        }
         document.getElementById('q-count').innerText = qCount;
         generateQuestion();
         resetTimer();
     }
 
+    function generateQuestion() {
+        let n1 = Math.floor(Math.random() * 10) + 1;
+        let n2 = Math.floor(Math.random() * 10) + 1;
+        let ops = ['+', '-', '*'];
+        let op = ops[Math.floor(Math.random() * ops.length)];
+        
+        if (op === '+') correctAnswer = n1 + n2;
+        else if (op === '-') { if(n1 < n2) [n1, n2] = [n2, n1]; correctAnswer = n1 - n2; }
+        else if (op === '*') correctAnswer = n1 * n2;
+
+        document.getElementById('question-text').innerText = ${n1} ${op} ${n2} = ?;
+        document.getElementById('answer-input').value = '';
+        document.getElementById('answer-input').focus();
+    }
+
     function resetTimer() {
         clearInterval(timerInterval);
         timeLeft = 5;
-        timerEl.innerText = timeLeft;
+        document.getElementById('timer').innerText = timeLeft;
         timerInterval = setInterval(() => {
             timeLeft--;
-            timerEl.innerText = timeLeft;
-            if (timeLeft <= 0) nextQuestion();
+            document.getElementById('timer').innerText = timeLeft;
+            if (timeLeft <= 0) {
+                qCount++;
+                nextQuestion();
+            }
         }, 1000);
     }
 
-    answerEl.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter' && answerEl.value !== '') {
-            if (parseInt(answerEl.value) === correctAnswer) score++;
+    document.getElementById('answer-input').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            if (parseInt(document.getElementById('answer-input').value) === correctAnswer) {
+                score++;
+            }
+            qCount++;
             nextQuestion();
         }
     });
 
     function showResult() {
         clearInterval(timerInterval);
-        gameScreen.classList.add('hidden');
-        endScreen.classList.remove('hidden');
-        document.getElementById('final-score').innerText = حصلتِ على ${score} من 10;
-        
-        let adviceText = "";
-        if (difficulty === 'expert') {
-            adviceText = score >= 8 ? "أنتِ عبقرية رياضية حقاً! لا أحد يضاهي سرعتكِ." : "تحدي الأذكياء صعب، لكنكِ أديتِ بشكل رائع!";
-        } else {
-            adviceText = score >= 8 ? "أداء ممتاز! ذكاء حاد وسرعة بديهة." : 
-                         score >= 5 ? "أداء جيد، استمري في التدريب لتصبحي أسرع." : 
-                         "محاولة جيدة، الحساب الذهني يتحسن مع التكرار!";
-        }
-        document.getElementById('advice').innerText = adviceText;
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = حصلت على ${score} من 10;
+        let advice = score >= 8 ? "أداء ممتاز! ذكاء حاد وسرعة بديهة." : "محاولة جيدة، الحساب الذهني يتحسن مع التكرار!";
+        document.getElementById('advice').innerText = advice;
     }
 </script>
 
